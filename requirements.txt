@@ -1,1 +1,4 @@
-flask telebot requests bs4
+pyTelegramBotAPI==4.20.0
+flask==3.0.0
+requests
+bs4
