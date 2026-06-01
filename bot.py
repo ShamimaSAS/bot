@@ -846,6 +846,14 @@ if __name__ == "__main__":
     # প্রাথমিক API টোকেন সেটআপ
     get_api_token()
     
+    # ওয়েবহুক সরান (যদি আগে থেকে থাকে)
+    try:
+        bot.remove_webhook()
+        print("✅ Webhook removed")
+        time.sleep(1)
+    except:
+        pass
+    
     # ফ্লাস্ক থ্রেড
     flask_thread = threading.Thread(target=run_flask)
     flask_thread.start()
@@ -859,7 +867,12 @@ if __name__ == "__main__":
         bot.get_chat(FORCE_GROUP)
         print("✅ Channel and Group Access Success.")
     except:
-        print("⚠️ Access Problem! Make sure bot is admin.")
+        print(f"⚠️ Access Problem! Make sure bot is admin.")
     
-    print("🚀 Bot Running...")
-    bot.infinity_polling(timeout=60, long_polling_timeout=60)
+    # পোলিং শুরু (এক্সক্লুসিভ মোডে)
+    print("🚀 Bot Running with Polling...")
+    try:
+        # drop_pending_updates=True পুরনো আপডেট স্কিপ করে
+        bot.infinity_polling(timeout=60, long_polling_timeout=60, skip_pending=True)
+    except Exception as e:
+        print(f"Polling error: {e}")
