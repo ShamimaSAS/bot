@@ -33,8 +33,8 @@ ADMINS_FILE = "admins.json"
 OTP_MONITOR_FILE = "otp_monitor.json"
 
 # ========== API লগইন তথ্য ==========
-API_EMAIL = os.environ.get('EMAIL')
-API_PASSWORD = os.environ.get('PASSWORD')
+API_EMAIL = "shamimaakter9027582@gmail.com"
+API_PASSWORD = "Shahin420@"
 API_TOKEN = None
 ses = requests.Session()
 # ========== ডাটাবেস ফাংশন ==========
