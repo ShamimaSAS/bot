@@ -1,5 +1,48 @@
-*.pyc
+# Python
 __pycache__/
-user_numbers.json
-numbers.txt
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+venv/
+env/
+ENV/
 .env
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Database files (এইগুলো Render-এ থাকবে, গিটহাবে যাবে না)
+user_numbers.json
+ranges.json
+admins.json
+otp_monitor.json
+
+# Numbers file
+numbers.txt
+
+# Logs
+*.log
+bot.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Flask
+instance/
+.webassets-cache
+
+# Render
+.render/
