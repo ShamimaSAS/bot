@@ -36,7 +36,7 @@ OTP_MONITOR_FILE = "otp_monitor.json"
 API_EMAIL = os.environ.get('EMAIL')
 API_PASSWORD = os.environ.get('PASSWORD')
 API_TOKEN = None
-
+ses = requests.Session()
 # ========== ডাটাবেস ফাংশন ==========
 def load_user_data():
     if os.path.exists(USER_DATA_FILE):
@@ -51,7 +51,7 @@ def save_user_data(data):
 def load_ranges():
     if not os.path.exists(RANGES_FILE):
         default_ranges = {
-            "facebook": {"US": "22507675XXX", "BD": "22507676XXX"},
+            "facebook": {"US": "22507675XXX", "CI": "22891XXX"},
             "instagram": {"US": "22507677XXX", "BD": "22507678XXX"},
             "whatsapp": {"US": "22507679XXX", "BD": "22507680XXX"}
         }
@@ -104,8 +104,15 @@ def get_api_token():
         'accept-language': 'en-US,en;q=0.9,bn;q=0.8',
         'content-type': 'application/json',
         'origin': 'https://x.mnitnetwork.com',
+        'priority': 'u=1, i',
         'referer': 'https://x.mnitnetwork.com/mauth/login',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
     }
     
     json_data = {
@@ -114,7 +121,7 @@ def get_api_token():
     }
     
     try:
-        response = requests.post('https://x.mnitnetwork.com/mapi/v1/mauth/login', headers=headers, json=json_data, timeout=30)
+        response = ses.post('https://x.mnitnetwork.com/mapi/v1/mauth/login', headers=headers, json=json_data, timeout=30)
         
         if response.status_code == 200:
             response_data = response.json()
@@ -137,9 +144,19 @@ def get_number_from_api(range_value):
     
     headers = {
         'accept': 'application/json, text/plain, */*',
+        'accept-language': 'en-US,en;q=0.9,bn;q=0.8',
         'content-type': 'application/json',
         'mauthtoken': API_TOKEN,
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'origin': 'https://x.mnitnetwork.com',
+        'priority': 'u=1, i',
+        'referer': f'https://x.mnitnetwork.com/mdashboard/getnum?range={range_value}',
+        'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
     }
     
     json_data = {
@@ -149,7 +166,7 @@ def get_number_from_api(range_value):
     }
     
     try:
-        response = requests.post('https://x.mnitnetwork.com/mapi/v1/mdashboard/getnum/number', headers=headers, json=json_data, timeout=30)
+        response = ses.post('https://x.mnitnetwork.com/mapi/v1/mdashboard/getnum/number', headers=headers, json=json_data, timeout=30)
         
         if response.status_code == 200:
             response_data = response.json()
@@ -175,9 +192,18 @@ def check_otp_for_number(number, range_value):
     
     headers = {
         'accept': 'application/json, text/plain, */*',
+        'accept-language': 'en-US,en;q=0.9,bn;q=0.8',
         'content-type': 'application/json',
         'mauthtoken': API_TOKEN,
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'priority': 'u=1, i',
+        'referer': f'https://x.mnitnetwork.com/mdashboard/getnum?range={range_value}',
+        'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
     }
     
     params = {
@@ -188,7 +214,7 @@ def check_otp_for_number(number, range_value):
     }
     
     try:
-        response = requests.get('https://x.mnitnetwork.com/mapi/v1/mdashboard/getnum/info', headers=headers, params=params, timeout=30)
+        response = ses.get('https://x.mnitnetwork.com/mapi/v1/mdashboard/getnum/info', headers=headers, params=params, timeout=30)
         
         if response.status_code == 200:
             response_data = response.json()
@@ -238,7 +264,7 @@ def monitor_otp(user_id, number, service, country, range_value):
     max_duration = 20 * 60  # 20 minutes
     
     while (datetime.now() - start_time).total_seconds() < max_duration:
-        time.sleep(30)  # প্রতি 30 সেকেন্ডে চেক করে
+        time.sleep(5)  # প্রতি 5 সেকেন্ডে চেক করে
         
         result = check_otp_for_number(number, range_value)
         
