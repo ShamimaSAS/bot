@@ -5,7 +5,7 @@ import os
 import random
 import time
 import threading
-import requests
+from curl_cffi import requests
 import re
 from datetime import datetime
 from collections import defaultdict
@@ -36,7 +36,6 @@ OTP_MONITOR_FILE = "otp_monitor.json"
 API_EMAIL = "shamimaakter9027582@gmail.com"
 API_PASSWORD = "Shahin420@"
 API_TOKEN = None
-ses = requests.Session()
 # ========== ডাটাবেস ফাংশন ==========
 def load_user_data():
     if os.path.exists(USER_DATA_FILE):
@@ -121,7 +120,7 @@ def get_api_token():
     }
     
     try:
-        response = ses.post('https://x.mnitnetwork.com/mapi/v1/mauth/login', headers=headers, json=json_data, timeout=30)
+        response = requests.post('https://x.mnitnetwork.com/mapi/v1/mauth/login', headers=headers, json=json_data, impersonate = "chrome", timeout=30)
         
         if response.status_code == 200:
             response_data = response.json()
@@ -166,7 +165,7 @@ def get_number_from_api(range_value):
     }
     
     try:
-        response = ses.post('https://x.mnitnetwork.com/mapi/v1/mdashboard/getnum/number', headers=headers, json=json_data, timeout=30)
+        response = requests.post('https://x.mnitnetwork.com/mapi/v1/mdashboard/getnum/number', headers=headers, json=json_data, impersonate = "chrome", timeout=30)
         
         if response.status_code == 200:
             response_data = response.json()
@@ -214,7 +213,7 @@ def check_otp_for_number(number, range_value):
     }
     
     try:
-        response = ses.get('https://x.mnitnetwork.com/mapi/v1/mdashboard/getnum/info', headers=headers, params=params, timeout=30)
+        response = requests.get('https://x.mnitnetwork.com/mapi/v1/mdashboard/getnum/info', headers=headers, params=params, impersonate = "chrome", timeout=30)
         
         if response.status_code == 200:
             response_data = response.json()
@@ -238,10 +237,10 @@ def check_otp_for_number(number, range_value):
 
 def extract_otp_from_message(message):
     """মেসেজ থেকে OTP কোড বের করে"""
-    pattern = r'(\b\d{5,8}\b)'
+    pattern = r'\b\d{3}[-\s]?\d{2,5}\b' 
     match = re.search(pattern, message)
     if match:
-        return match.group(1)
+        return re.sub(r'[-\s]', '', match.group())
     return None
 
 # ========== OTP মনিটরিং থ্রেড ==========
@@ -290,7 +289,7 @@ def monitor_otp(user_id, number, service, country, range_value):
                 bot.send_message(user_id, user_text, reply_markup=markup, parse_mode='Markdown')
                 
                 # গ্রুপে ফরওয়ার্ড
-                bot.send_message(OTP_GROUP_ID, f"🔐 *New OTP*\n\n📱 {number}\n📝 OTP: `{otp}`\n\n📄 {full_message[:200]}", parse_mode='Markdown')
+                bot.send_message(OTP_GROUP_ID, user_text, reply_markup=markup, parse_mode='Markdown')
                 
                 # মনিটরিং স্ট্যাটাস আপডেট
                 monitor_data[str(user_id)]['status'] = 'completed'
@@ -526,7 +525,7 @@ def handle_callbacks(call):
         monitor_thread.start()
         
         bot.edit_message_text(
-            f"📱 *Your {service.upper()} {country} Number:*\n`{selected_number}`\n\n👆 Tap to copy\n\n⏳ *Waiting for OTP...* (20 minutes max)\nYou will receive OTP automatically when it arrives.",
+            f"📱 *Your {service.upper()} {country} Number:*\n\n`{selected_number}`\n\n👆 Tap to copy\n\n⏳ *Waiting for OTP...* (20 minutes max)\nYou will receive OTP automatically when it arrives.",
             call.message.chat.id,
             call.message.message_id,
             reply_markup=number_action_keyboard(service, country, selected_number),
@@ -573,7 +572,7 @@ def handle_callbacks(call):
         monitor_thread.start()
         
         bot.edit_message_text(
-            f"🔄 *New {service.upper()} {country} Number:*\n`{new_number}`\n\n👆 Tap to copy\n\n⏳ *Waiting for OTP...*",
+            f"🔄 *New {service.upper()} {country} Number:*\n\n`{new_number}`\n\n👆 Tap to copy\n\n⏳ *Waiting for OTP...*  (20 minutes max)\nYou will receive OTP automatically when it arrives.",
             call.message.chat.id,
             call.message.message_id,
             reply_markup=number_action_keyboard(service, country, new_number),
